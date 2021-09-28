@@ -621,4 +621,27 @@ static NSCharacterSet *curlyBrackets = nil;
   return res;
 }
 
+- (NSArray *) evalSwiftUIWith:(NSArray *) views {
+  if ([_res count] == 0) {return nil;}
+  UIScriptASTDirectionType dir = UIScriptASTDirectionTypeDescendant;
+  // INFO: Visibility is forced to ALL by default
+  UIScriptASTVisibilityType visibility = UIScriptASTVisibilityTypeAll;
+
+  //index and first match first = [res objectAtIndex:index];
+  //dir is direction or default direction
+  NSArray *res = views;
+
+  for (UIScriptAST *cur in _res) {
+    if ([cur isKindOfClass:[UIScriptASTDirection class]]) {
+      dir = [(UIScriptASTDirection *) cur directionType];
+    } else if ([cur isKindOfClass:[UIScriptASTVisibility class]]) {
+      // INFO: Ignore for now, use ALL visibility by default
+      // visibility = [(UIScriptASTVisibility *) cur visibilityType];
+    } else {
+      res = [cur evalSwiftUIWith:res direction:dir visibility:visibility];
+    }
+  }
+  return res;
+}
+
 @end

@@ -21,6 +21,10 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		3BACF64E270351C100C5A110 /* LPQuerySwiftUIOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BACF64C270351C000C5A110 /* LPQuerySwiftUIOperation.h */; };
+		3BACF64F270351C100C5A110 /* LPQuerySwiftUIOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BACF64C270351C000C5A110 /* LPQuerySwiftUIOperation.h */; };
+		3BACF650270351C100C5A110 /* LPQuerySwiftUIOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BACF64D270351C100C5A110 /* LPQuerySwiftUIOperation.m */; };
+		3BACF651270351C100C5A110 /* LPQuerySwiftUIOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BACF64D270351C100C5A110 /* LPQuerySwiftUIOperation.m */; };
 		42069AFD1EB1035B00C1F0A5 /* LPMachClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 42069AFC1EB1035B00C1F0A5 /* LPMachClock.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		42069AFE1EB103C100C1F0A5 /* LPMachClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 42069AFC1EB1035B00C1F0A5 /* LPMachClock.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		42069B001EB103C200C1F0A5 /* LPMachClock.m in Sources */ = {isa = PBXBuildFile; fileRef = 42069AFC1EB1035B00C1F0A5 /* LPMachClock.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -557,6 +561,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3BACF64C270351C000C5A110 /* LPQuerySwiftUIOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LPQuerySwiftUIOperation.h; sourceTree = "<group>"; };
+		3BACF64D270351C100C5A110 /* LPQuerySwiftUIOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LPQuerySwiftUIOperation.m; sourceTree = "<group>"; };
 		42069AFB1EB1034600C1F0A5 /* LPMachClock.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = LPMachClock.h; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; wrapsLines = 1; };
 		42069AFC1EB1035B00C1F0A5 /* LPMachClock.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = LPMachClock.m; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; wrapsLines = 1; };
 		429CD6901EAFBC1800E7CA85 /* LPClearTextRoute.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = LPClearTextRoute.h; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; wrapsLines = 1; };
@@ -1234,6 +1240,8 @@
 		B184FDC114B6DB2B002A744C /* Operations */ = {
 			isa = PBXGroup;
 			children = (
+				3BACF64C270351C000C5A110 /* LPQuerySwiftUIOperation.h */,
+				3BACF64D270351C100C5A110 /* LPQuerySwiftUIOperation.m */,
 				B184FDC214B6DB2B002A744C /* LPOperation.h */,
 				B184FE9214B6DDA1002A744C /* LPOperation.m */,
 				F5CAC06A180D499600E23F03 /* LPSliderOperation.h */,
@@ -1869,6 +1877,7 @@
 				F55185771AC389F600CE06DC /* LPHTTPDynamicFileResponse.h in Headers */,
 				F55185781AC389F600CE06DC /* LPHTTPFileResponse.h in Headers */,
 				F55185791AC38A5200CE06DC /* LPHTTPResponse.h in Headers */,
+				3BACF64F270351C100C5A110 /* LPQuerySwiftUIOperation.h in Headers */,
 				F50292971ACAD4FE00D07D31 /* LPWebViewUtils.h in Headers */,
 				F551857A1AC38A5200CE06DC /* LPRoute.h in Headers */,
 				F551857B1AC38A5200CE06DC /* LPRouter.h in Headers */,
@@ -1890,6 +1899,7 @@
 				F59C5CFD18E0BBAE0087B51D /* LPHTTPDynamicFileResponse.h in Headers */,
 				F59C5CFE18E0BBAE0087B51D /* LPHTTPFileResponse.h in Headers */,
 				F5097CEB1B6A34D800326D6A /* LPHTTPResponse.h in Headers */,
+				3BACF64E270351C100C5A110 /* LPQuerySwiftUIOperation.h in Headers */,
 				F5F2D5E31ACACF2F0027937B /* LPWebViewUtils.h in Headers */,
 				F59C5CF818E0BB1A0087B51D /* LPRoute.h in Headers */,
 				F59C5CF918E0BB290087B51D /* LPRouter.h in Headers */,
@@ -2300,6 +2310,7 @@
 				B15BF99C19ABB1DD00B38577 /* LPGCDAsyncSocket.m in Sources */,
 				B15BF99D19ABB1DD00B38577 /* LPHTTPAuthenticationRequest.m in Sources */,
 				B15BF99E19ABB1DD00B38577 /* LPHTTPConnection.m in Sources */,
+				3BACF651270351C100C5A110 /* LPQuerySwiftUIOperation.m in Sources */,
 				F52975C81D4FBA29009094D5 /* LPSetDeviceOrientationRoute.m in Sources */,
 				B1F772321A22A398009A2336 /* LPUIASharedElementChannel.m in Sources */,
 				B15BF99F19ABB1DD00B38577 /* LPHTTPMessage.m in Sources */,
@@ -2425,6 +2436,7 @@
 				F5091BE018C4E1D700C85307 /* LPHTTPMessage.m in Sources */,
 				F5091BE118C4E1D700C85307 /* LPHTTPServer.m in Sources */,
 				F5091BE218C4E1D700C85307 /* NSData+LPCHSExtensions.m in Sources */,
+				3BACF650270351C100C5A110 /* LPQuerySwiftUIOperation.m in Sources */,
 				F52975C61D4FBA29009094D5 /* LPSetDeviceOrientationRoute.m in Sources */,
 				B1F7722E1A22A398009A2336 /* LPUIASharedElementChannel.m in Sources */,
 				F5091BE318C4E1D700C85307 /* NSNumber+LPCHSExtensions.m in Sources */,

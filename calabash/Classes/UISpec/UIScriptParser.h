@@ -19,5 +19,6 @@
 - (void) parse;
 - (NSArray *) parsedTokens;
 - (NSArray *) evalWith:(NSArray *) views;
+- (NSArray *) evalSwiftUIWith:(NSArray *) views;
 
 @end

@@ -134,7 +134,12 @@
     LPLogDebug(@"Map %@, %@ Parsed UIScript as\n%@", method, path, tokens);
 
     NSArray *allWindows = [LPTouchUtils applicationWindows];
-    result = [self.parser evalWith:allWindows];
+    
+    if ([[operation objectForKey:@"method_name"] isEqual:@"query_swift_ui"]) {
+      result = [self.parser evalSwiftUIWith:allWindows];
+    } else {
+      result = [self.parser evalWith:allWindows];
+    }
   } else {
     result = nil;
   }

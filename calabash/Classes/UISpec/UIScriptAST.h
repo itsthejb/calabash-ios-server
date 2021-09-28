@@ -17,6 +17,8 @@ typedef enum {
 
 @interface UIScriptAST : NSObject
 
+- (NSMutableArray *) evalSwiftUIWith:(NSArray *) views direction:(UIScriptASTDirectionType) dir visibility:(UIScriptASTVisibilityType) visibility;
+
 - (NSMutableArray *) evalWith:(NSArray *) views direction:(UIScriptASTDirectionType) dir visibility:(UIScriptASTVisibilityType) visibility;
 
 @end

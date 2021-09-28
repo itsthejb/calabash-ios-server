@@ -156,6 +156,9 @@
   }
 }
 
+- (NSMutableArray *) evalSwiftUIWith:(NSArray *) views direction:(UIScriptASTDirectionType) dir visibility:(UIScriptASTVisibilityType) visibility {
+  return [self evalWith:views direction:dir visibility:visibility];
+}
 
 - (NSMutableArray *) evalWith:(NSArray *) views direction:(UIScriptASTDirectionType) dir visibility:(UIScriptASTVisibilityType) visibility {
 
