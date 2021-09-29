@@ -15,6 +15,7 @@
 #import "LPCollectionViewScrollToItemWithMarkOperation.h"
 #import "LPScrollOperation.h"
 #import "LPQueryOperation.h"
+#import "LPQuerySwiftUIOperation.h"
 #import "LPFlashOperation.h"
 #import "LPSetTextOperation.h"
 #import "LPDatePickerOperation.h"
@@ -65,6 +66,8 @@
     operation = [[LPScrollOperation alloc] initWithOperation:dictionary];
   } else if ([opName isEqualToString:@"query"]) {
     operation = [[LPQueryOperation alloc] initWithOperation:dictionary];
+  } else if ([opName isEqualToString:@"query_swift_ui"]) {
+    operation = [[LPQuerySwiftUIOperation alloc] initWithOperation:dictionary];
   } else if ([opName isEqualToString:@"query_all"]) {
     operation = [[LPQueryAllOperation alloc] initWithOperation:dictionary];
   } else if ([opName isEqualToString:@"setText"]) {

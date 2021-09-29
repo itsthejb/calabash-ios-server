@@ -12,4 +12,8 @@
   return nil;
 }
 
+- (NSMutableArray *) evalSwiftUIWith:(NSArray *) views direction:(UIScriptASTDirectionType) dir visibility:(UIScriptASTVisibilityType) visibility {
+  return nil;
+}
+
 @end

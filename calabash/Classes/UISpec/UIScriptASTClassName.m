@@ -24,6 +24,36 @@
   return self;
 }
 
+- (NSMutableArray *) evalSwiftUIWith:(NSArray *) views direction:(UIScriptASTDirectionType) dir visibility:(UIScriptASTVisibilityType) visibility {
+
+  NSMutableArray *res = [NSMutableArray arrayWithCapacity:8];
+
+  for (UIView *view in views) {
+    switch (dir) {
+      case UIScriptASTDirectionTypeDescendant:
+        [self evalDescWith:view result:res];
+        break;
+      case UIScriptASTDirectionTypeChild:
+        [self evalChildWith:view result:res];
+        break;
+      case UIScriptASTDirectionTypeParent:
+        [self evalParentsWith:view result:res];
+        break;
+      case UIScriptASTDirectionTypeSibling:
+        [self evalSiblingsWith:view result:res];
+        break;
+      case UIScriptASTDirectionTypeAcc:
+        [self evalAccessibilityWith:view result:res visibility:visibility];
+        break;
+      case UIScriptASTDirectionTypeAccParent:
+        [self evalAccessibilityParentWith:view result:res visibility:visibility];
+        break;
+    }
+  }
+
+
+  return res;
+}
 
 - (NSMutableArray *) evalWith:(NSArray *) views direction:(UIScriptASTDirectionType) dir visibility:(UIScriptASTVisibilityType) visibility {
 
@@ -88,6 +118,45 @@ static NSInteger sortFunction(UIView *v1, UIView *v2, void *ctx) {
   }
 }
 
+- (BOOL) isSwiftUIClass:(UIView *) view {
+  // INFO: Skip any non Swift UI element by default
+  if (![NSStringFromClass([view class]) isEqual:@"SwiftUI.AccessibilityNode"]) {
+    return false;
+  }
+  
+  // INFO: For _class=UIView, it means the locator path has "*" and refer to any class
+  if ([_class isEqual:[UIView class]]) {
+    return true;
+  }
+  
+  // INFO: skip check in case the view does not have accessibilityTraits property
+  if (![view respondsToSelector:@selector(accessibilityTraits)]) {
+    return false;
+  }
+
+  // INFO: For _class=UILabel, UIButton, others, it means the element should have appropriate accissibility trait like
+  /*
+     UILabel => UIAccessibilityTraitStaticText,
+     UIButton => UIAccessibilityTraitButton,
+     ...
+   */
+  UIAccessibilityTraits traits = [view accessibilityTraits];
+  if ([_class isEqual:[UILabel class]] && (traits == UIAccessibilityTraitStaticText)) {
+    return true;
+  }
+  
+  return false;
+}
+
+- (void) evalDescWith:(UIView *) view result:(NSMutableArray *) res {
+  if ([view isKindOfClass:_class] || [self isSwiftUIClass:view]) {
+    [res addObject:view];
+  }
+
+  for (UIView *subview in [LPTouchUtils accessibilityChildrenFor: view]) {
+    [self evalDescWith:subview result:res];
+  }
+}
 
 - (void) evalDescWith:(UIView *) view result:(NSMutableArray *) res visibility:(UIScriptASTVisibilityType) visibility {
   if ([view isKindOfClass:_class]) {
@@ -100,6 +169,13 @@ static NSInteger sortFunction(UIView *v1, UIView *v2, void *ctx) {
   }
 }
 
+- (void) evalChildWith:(UIView *) view result:(NSMutableArray *) res {
+  for (UIView *childView in [LPTouchUtils accessibilityChildrenFor: view]) {
+    if ([childView isKindOfClass:_class] || [self isSwiftUIClass:view]) {
+      [res addObject:childView];
+    }
+  }
+}
 
 - (void) evalChildWith:(UIView *) view result:(NSMutableArray *) res visibility:(UIScriptASTVisibilityType) visibility {
   for (UIView *childView in [view subviews]) {
@@ -109,6 +185,28 @@ static NSInteger sortFunction(UIView *v1, UIView *v2, void *ctx) {
   }
 }
 
+- (void) evalParentsWith:(UIView *) view result:(NSMutableArray *) res {
+  id parentView = nil;
+
+  if ([view respondsToSelector:@selector(superview)]) {
+    parentView = [view superview];
+  } else {
+    if ([view respondsToSelector:@selector(accessibilityContainer)]) {
+      parentView = [(UIAccessibilityElement *)view accessibilityContainer];
+    }
+    else {
+      return;
+    }
+  }
+
+  if ([parentView isKindOfClass:_class] || [self isSwiftUIClass:parentView]) {
+    [res addObject:parentView];
+  }
+
+  if (parentView) {
+    [self evalParentsWith:parentView result:res];
+  }
+}
 
 - (void) evalParentsWith:(UIView *) view result:(NSMutableArray *) res visibility:(UIScriptASTVisibilityType) visibility {
 //    if ([view isKindOfClass:_class]) {
@@ -125,6 +223,35 @@ static NSInteger sortFunction(UIView *v1, UIView *v2, void *ctx) {
   }
 }
 
+- (void) evalSiblingsWith:(UIView *) view result:(NSMutableArray *) res {
+  id parentView = nil;
+
+  if ([view respondsToSelector:@selector(superview)]) {
+    parentView = [view superview];
+  } else {
+    if ([view respondsToSelector:@selector(accessibilityContainer)]) {
+      if (@available(iOS 11.0, *)) {
+        parentView = [(UIAccessibilityElement *)view accessibilityContainer];
+      } else {
+        // Fallback on earlier versions
+      }
+    }
+    else {
+      return;
+    }
+  }
+  
+  NSArray *children = [LPTouchUtils accessibilityChildrenFor:parentView];
+  for (UIView *siblingOrSelf in children) {
+    if (siblingOrSelf != view && ([siblingOrSelf isKindOfClass:_class] || [self isSwiftUIClass:siblingOrSelf])) {
+      [res addObject:siblingOrSelf];
+    }
+  }
+  
+  if ([view respondsToSelector:@selector(accessibilityContainer)]) {
+    
+  }
+}
 
 - (void) evalSiblingsWith:(UIView *) view result:(NSMutableArray *) res visibility:(UIScriptASTVisibilityType) visibility {
   UIView *parentView = [view superview];
