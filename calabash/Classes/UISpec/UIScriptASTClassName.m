@@ -247,10 +247,6 @@ static NSInteger sortFunction(UIView *v1, UIView *v2, void *ctx) {
       [res addObject:siblingOrSelf];
     }
   }
-  
-  if ([view respondsToSelector:@selector(accessibilityContainer)]) {
-    
-  }
 }
 
 - (void) evalSiblingsWith:(UIView *) view result:(NSMutableArray *) res visibility:(UIScriptASTVisibilityType) visibility {

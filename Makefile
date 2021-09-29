@@ -11,6 +11,9 @@ clean:
 framework:
 	bin/make/framework.sh
 
+framework-no-certificate:
+	bin/make/framework_no_version.sh
+
 dylibs:
 	bin/make/dylibs.sh
 
