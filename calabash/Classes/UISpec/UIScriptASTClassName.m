@@ -134,14 +134,14 @@ static NSInteger sortFunction(UIView *v1, UIView *v2, void *ctx) {
     return false;
   }
 
-  // INFO: For _class=UILabel, UIButton, others, it means the element should have appropriate accissibility trait like
+  // INFO: For _class=UILabel, UIButton, others, it means the element should have appropriate accessibility trait like:
   /*
      UILabel => UIAccessibilityTraitStaticText,
      UIButton => UIAccessibilityTraitButton,
      ...
    */
-  UIAccessibilityTraits traits = [view accessibilityTraits];
-  if ([_class isEqual:[UILabel class]] && (traits == UIAccessibilityTraitStaticText)) {
+  // INFO: Accessibility traits can be combined
+  if ([self accessibilityMatch:view]) {
     return true;
   }
   
