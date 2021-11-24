@@ -120,13 +120,15 @@ CGFloat LP_MIN_FLOAT = INT32_MIN * 1.0;
 
 +(id)jsonifyObject:(id)object fullDump:(BOOL)dump {
   if (!object) {return nil;}
+
   if ([object isKindOfClass:[UIColor class]]) {
     UIColor *color = (UIColor*)object;
     CGFloat red, green, blue, alpha;
     [color getRed:&red green:&green blue:&blue alpha:&alpha];
     return @{@"red": @(red), @"green": @(green), @"blue": @(blue), @"alpha": @(alpha), @"type": NSStringFromClass([object class])};
   }
-  else if ([object isKindOfClass:[UIView class]]) {
+
+  if ([object isKindOfClass:[UIView class]]) {
     NSMutableDictionary *viewJson = [self dictionaryByEncodingView:(UIView*) object];
     if (dump) {
       [LPJSONUtils insertHitPointIntoMutableDictionary:viewJson];
@@ -137,7 +139,8 @@ CGFloat LP_MIN_FLOAT = INT32_MIN * 1.0;
     }
     return viewJson;
   }
-  else if ([object respondsToSelector:@selector(isAccessibilityElement)] &&
+  
+  if ([object respondsToSelector:@selector(isAccessibilityElement)] &&
            [object isAccessibilityElement]) {
     NSMutableDictionary *viewJson = [self jsonifyAccessibilityElement:object];
     if (dump) {
@@ -149,7 +152,9 @@ CGFloat LP_MIN_FLOAT = INT32_MIN * 1.0;
 
     }
     return viewJson;
-  } else if ([object respondsToSelector:@selector(accessibilityElementCount)] &&
+  }
+  
+  if ([object respondsToSelector:@selector(accessibilityElementCount)] &&
              [object respondsToSelector:@selector(accessibilityElementAtIndex:)] &&
              [object accessibilityElementCount] != NSNotFound &&
              [object accessibilityElementCount] > 0 ) {
@@ -160,11 +165,24 @@ CGFloat LP_MIN_FLOAT = INT32_MIN * 1.0;
         viewJson[@"type"] = viewJson[@"class"];
         [viewJson removeObjectForKey:@"class"];
       }
-
     }
     return viewJson;
   }
-
+  
+  // INFO: the object needs to be serialized in case it is SwiftUI.AccessibilityNode element, but isAccessibilityElement or other methods do not work
+  if ([NSStringFromClass([object class]) isEqual:@"SwiftUI.AccessibilityNode"]) {
+    NSMutableDictionary *viewJson = [self jsonifyAccessibilityElement: object];
+    if (dump) {
+      [self dumpAccessibilityElement: object toDictionary:viewJson];
+      if (viewJson[@"class"]) {
+        viewJson[@"type"] = viewJson[@"class"];
+        [viewJson removeObjectForKey:@"class"];
+      }
+    }
+    
+    return viewJson;
+  }
+      
   // Sometimes we don't actually want to return an JSON encoded string because
   // the object will be passed throught the serializer again and we'd end up
   // with results like this:

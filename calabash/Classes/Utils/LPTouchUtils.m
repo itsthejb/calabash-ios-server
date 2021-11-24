@@ -10,6 +10,9 @@
 #import "LPTouchUtils.h"
 #import "LPDevice.h"
 #import "LPCocoaLumberjack.h"
+#import "LPInvoker.h"
+#import "LPInvocationResult.h"
+#import "LPInvocationError.h"
 
 @implementation LPTouchUtils
 
@@ -314,15 +317,40 @@
   if ([view respondsToSelector:@selector(subviews)]) {
     [arr addObjectsFromArray:[view subviews]];
   }
+  
   if ([view respondsToSelector:@selector(accessibilityElementCount)] &&
       [view respondsToSelector:@selector(accessibilityElementAtIndex:)]) {
     NSInteger count = [view accessibilityElementCount];
     if (count == 0 || count == NSNotFound) {
-      return [NSArray arrayWithArray:arr];
-    }
-    for (NSInteger i=0;i<count;i++) {
-      id accEl = [view accessibilityElementAtIndex:i];
-      [arr addObject:accEl];
+      // INFO: try to find hidden accessibility elements, only iOS 15
+      if (@available(iOS 15.0, *)) {
+        SEL sel = NSSelectorFromString(@"_accessibilityUserTestingChildren");
+        if ([view respondsToSelector:sel] && ![view respondsToSelector:@selector(subviews)]) {
+            LPInvocationResult *invocationResult = [LPInvoker invokeZeroArgumentSelector:sel withTarget:view];
+            
+            if ([invocationResult isError]) {
+              NSLog(@"[DEBUG] Invocation has error result: %@", [invocationResult description]);
+            } else {
+              id elements = invocationResult.value;
+              if ([elements respondsToSelector:@selector(count)]) {
+                NSInteger elementsCount = [elements count];
+                if (elementsCount > 0) {
+                  for (NSInteger i=0;i<elementsCount;i++) {
+                    id accElement = [elements accessibilityElementAtIndex:i];
+                    [arr addObject:accElement];
+                  }
+                }
+              }
+            }
+        }
+      } else {
+        return [NSArray arrayWithArray:arr];
+      }
+    } else {
+      for (NSInteger i=0;i<count;i++) {
+        id accEl = [view accessibilityElementAtIndex:i];
+        [arr addObject:accEl];
+      }
     }
   }
   return [NSArray arrayWithArray:arr];

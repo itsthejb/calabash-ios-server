@@ -129,11 +129,6 @@ static NSInteger sortFunction(UIView *v1, UIView *v2, void *ctx) {
     return true;
   }
   
-  // INFO: skip check in case the view does not have accessibilityTraits property
-  if (![view respondsToSelector:@selector(accessibilityTraits)]) {
-    return false;
-  }
-
   // INFO: For _class=UILabel, UIButton, others, it means the element should have appropriate accessibility trait like:
   /*
      UILabel => UIAccessibilityTraitStaticText,
@@ -292,11 +287,33 @@ static NSInteger sortFunction(UIView *v1, UIView *v2, void *ctx) {
   }
 }
 
+/*
+ [Flags]
+ public enum UIAccessibilityTrait : long {
+   None = 0,
+   Button = 1,
+   Link = 2,
+   Image = 4,
+   Selected = 8,
+   PlaysSound = 16,
+   KeyboardKey = 32,
+   StaticText = 64,
+   SummaryElement = 128,
+   NotEnabled = 256,
+   UpdatesFrequently = 512,
+   SearchField = 1024,
+   StartsMediaSession = 2048,
+   Adjustable = 4096,
+   AllowsDirectInteraction = 8192,
+   CausesPageTurn = 16384,
+   Header = 65536,
+ }
+ */
 -(BOOL)accessibilityMatch:(id)view {
   if ([view isKindOfClass:_class]) {
     return true;
   }
-  if (![view isAccessibilityElement]) {
+  if (![view respondsToSelector:@selector(accessibilityTraits)]) {
     return false;
   }
   UIAccessibilityTraits traits = [view accessibilityTraits];
