@@ -349,7 +349,11 @@
     } else {
       for (NSInteger i=0;i<count;i++) {
         id accEl = [view accessibilityElementAtIndex:i];
-        [arr addObject:accEl];
+        // INFO: For Swift UI, the hosting view can be in both arrays: subviews and accessibility elements one time.
+        // It produces the duplicate and causes double result issue for searching elements.
+        if (![arr containsObject:accEl]) {
+          [arr addObject:accEl];
+        }
       }
     }
   }
