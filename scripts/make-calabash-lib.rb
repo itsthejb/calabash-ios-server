@@ -27,11 +27,11 @@ else
   if target == 'sim'
     target_arg = 'calabash-simulator'
     sdk = 'iphonesimulator'
-    arches = 'i386 x86_64'
+    arches = 'arm64 x86_64'
   else
     target_arg = 'calabash-device'
     sdk = 'iphoneos'
-    arches = 'armv7 armv7s arm64'
+    arches = 'arm64'
   end
   args =
         [

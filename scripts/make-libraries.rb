@@ -145,7 +145,7 @@ def xcode_version
   end
 end
 
-def lipo_verify_arches(lib, arches=['i386', 'x86_64', 'armv7', 'armv7s', 'arm64'])
+def lipo_verify_arches(lib, sdk, arches=['x86_64', 'armv7', 'armv7s', 'arm64'])
   arches.each do |arch|
     sdk = /i386|x86_64/.match(arch) ? 'iphonesimulator' : 'iphoneos'
 
