@@ -3,7 +3,7 @@ calabash.xcodeproj/xcuserdata/
 *.xccheckout
 Markdown.pl
 build
-calabash.framework
+calabash.xcframework
 libFrankCalabash.a
 calabash-dylibs
 *.app
@@ -24,4 +24,3 @@ calabash-ios
 .irb-history
 .irbrc
 Gemfile.lock
-

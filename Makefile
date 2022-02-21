@@ -5,35 +5,27 @@ all:
 
 clean:
 	rm -rf build
-	rm -rf calabash.framework
+	rm -rf calabash.*framework
 	rm -rf libFrankCalabash.a
 	rm -rf calabash-dylibs
 
-framework:
-	rm -rf build
-	rm -rf calabash.framework
+framework: #clean
 	scripts/make-calabash-lib.rb sim
 	scripts/make-calabash-lib.rb device
 	scripts/make-calabash-lib.rb version
 	scripts/make-libraries.rb verify-framework
 
-frank:
-	rm -rf build
-	rm -rf libFrankCalabash.a
+frank: clean
 	scripts/make-frank-lib.rb sim
 	scripts/make-frank-lib.rb device
 	scripts/make-libraries.rb verify-frank
 
-dylibs:
-	rm -rf build
-	rm -rf calabash-dylibs
+dylibs: clean
 	scripts/make-calabash-dylib.rb sim
 	scripts/make-calabash-dylib.rb device
 	scripts/make-libraries.rb verify-dylibs
 
-dylib_sim:
-	rm -rf build
-	rm -rf calabash-dylibs
+dylib_sim: clean
 	scripts/make-calabash-dylib.rb sim
 	scripts/make-libraries.rb verify-sim-dylib
 
@@ -50,4 +42,3 @@ test_app:
 
 xct:
 	scripts/test/xctest.rb
-

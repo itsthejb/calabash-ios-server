@@ -118,7 +118,6 @@ def lipo_info(lib)
   "xcrun lipo -info #{lib}"
 end
 
-
 def lipo_put_info(lib)
   cmd = lipo_info(lib)
   puts 'INFO: checking combined lib'
@@ -147,8 +146,6 @@ end
 
 def lipo_verify_arches(lib, sdk, arches=['x86_64', 'armv7', 'armv7s', 'arm64'])
   arches.each do |arch|
-    sdk = /i386|x86_64/.match(arch) ? 'iphonesimulator' : 'iphoneos'
-
     cmd = lipo_verify(lib, arch, sdk)
     Open3.popen3(cmd) do |_, _, _, wait_thr|
       exit_status = wait_thr.value
@@ -161,27 +158,6 @@ def lipo_verify_arches(lib, sdk, arches=['x86_64', 'armv7', 'armv7s', 'arm64'])
       end
     end
   end
-end
-
-def lipo_combine_libs
-  staging = make_combined_lib_staging_dir
-  inputs = [path_to_device_lib, path_to_simulator_lib]
-  output = combined_lib_path(staging, combined_lib_name)
-  cmd = lipo_cmd(inputs, output)
-
-  puts 'INFO: combining libs'
-  puts "INFO: #{cmd}"
-  lipo_create = `#{cmd}`
-  result = $?
-
-  unless result.success?
-    puts 'FAIL: could not create combined lib'
-    puts "FAIL: '#{lipo_create.strip}'"
-    exit result.to_i
-  end
-
-  lipo_put_info(output)
-  lipo_verify_arches(output)
 end
 
 ## Assumes we have already build and setup stage for calabash combined libs
@@ -203,16 +179,58 @@ def lipo_combine_frank_libs
   end
 
   lipo_put_info(output)
-  lipo_verify_arches(output)
+  lipo_verify_arches(output, 'iphonesimulator')
 end
 
 def framework_product_name
   'calabash'
 end
 
-def make_framework(opts = {})
+def make_xcframework(opts = {})
+  default_opts = {:directory => './build/Debug-combined/calabash.xcframework'}
+  merged = default_opts.merge(opts)
+  platforms = {
+    "iphoneos" => {:path => path_to_device_lib, :arches => ['arm64']},
+    "iphonesimulator" => {:path => path_to_simulator_lib, :arches => ['arm64','x86_64']}
+  }
+
+  directory = merged[:directory]
+  plistBuddy = '/usr/libexec/PlistBuddy'
+  puts "INFO: making xcframework at '#{directory}'"
+  FileUtils.mkdir_p(File.join(directory))
+  plist = File.join(directory, "Info.plist")
+  FileUtils.cp('./scripts/templates/XCFramework.Info.plist', plist)
+
+  platforms.each do |platform, info|
+    puts "INFO: making framework for '#{platform}'"
+    make_framework({
+      :directory => File.join(File.join(directory, platform), 'calabash.framework'),
+      :platform => platform,
+      :path_to_lib => info[:path],
+      :arches => info[:arches]
+    })
+    plist_index = nil
+    for index in 0..1 do
+      if `#{plistBuddy} -c "Print :AvailableLibraries:#{index}:LibraryIdentifier" #{plist}`.chomp == platform
+        puts "INFO: found platform '#{platform}' at index #{index} in '#{plist}'"
+        plist_index = index
+      end
+    end
+    if plist_index == nil
+      puts "FAIL: couldn't find entry for platform '#{platform}' in #{plist}"
+      exit 1
+    end
+    info[:arches].each do |arch|
+      `#{plistBuddy} -c "Add :AvailableLibraries:#{plist_index}:SupportedArchitectures:0 string #{arch}" #{plist}`
+    end
+  end
+end
+
+private def make_framework(opts = {})
   default_opts = {:directory => './build/Debug-combined/calabash.framework',
-                  :combined_lib => combined_lib_name,
+                  :platform => 'iphoneos',
+                  :path_to_lib => path_to_device_lib,
+                  :arches => ['arm64'],
                   :version_exe => './build/Debug/version'}
 
   merged = default_opts.merge(opts)
@@ -225,30 +243,21 @@ def make_framework(opts = {})
   puts "INFO: making framework at '#{directory}'"
 
   framework_name = framework_product_name
+  lib = merged[:path_to_lib]
+  puts "INFO: installing lib '#{lib}' to '#{directory}'"
 
-  FileUtils.mkdir_p(File.join(directory, 'Versions/A/Headers'))
-
-  combined_lib = merged[:combined_lib]
-  puts "INFO: installing combined lib '#{combined_lib}' in '#{directory}'"
-
-  Dir.chdir(directory) do
-    `ln -sfh A Versions/Current`
-
-    lib = "../#{combined_lib}"
-    unless File.exists?(lib)
-      puts 'FAIL: combined lib does not exist'
-      puts "FAIL: could not find '#{File.join(Dir.pwd, lib)}'"
-      exit 1
-    end
-
-    FileUtils.cp(lib, "./Versions/A/#{framework_name}")
-    `ln -sfh Versions/Current/#{framework_name} #{framework_name}`
-
-    `ln -sfh Versions/Current/Headers Headers`
-
-    `cp -a ../../Debug-iphoneos/calabashHeaders/* Versions/A/Headers`
+  unless File.exists?(lib)
+    puts 'FAIL: lib does not exist'
+    puts "FAIL: could not find '#{File.join(Dir.pwd, lib)}'"
+    exit 1
   end
 
+  FileUtils.mkdir_p(File.join(directory, 'Versions/A/Headers'))
+  FileUtils.cp(lib, "#{directory}/Versions/A/#{framework_name}")
+  `cp -a ./build/Debug-iphoneos/calabashHeaders/* #{directory}/Versions/A/Headers`
+  `ln -sfh A #{directory}/Versions/Current`
+  `ln -sfh Versions/Current/#{framework_name} #{directory}/#{framework_name}`
+  `ln -sfh Versions/Current/Headers #{directory}/Headers`
 
   version_exe = merged[:version_exe]
   puts "INFO: installing Resources to '#{directory}'"
@@ -264,12 +273,12 @@ def make_framework(opts = {})
   end
 
   puts 'INFO: verifying framework'
-  lib = "#{directory}/#{framework_name}"
-  lipo_verify_arches(lib)
+  lib = "#{directory}/calabash"
+  lipo_verify_arches(lib, merged[:platform], merged[:arches])
 end
 
 def stage_framework(opts = {})
-  default_opts = {:source => './build/Debug-combined/calabash.framework',
+  default_opts = {:source => './build/Debug-combined/calabash.xcframework',
                   :target => './'}
   merged = default_opts.merge(opts)
 
@@ -277,19 +286,19 @@ def stage_framework(opts = {})
   target = merged[:target]
   puts "INFO: staging '#{source}' to '#{target}'"
 
-  if File.directory?('./calabash.framework')
-    puts 'INFO: removing old calabash.framework'
-    FileUtils.rm_r('./calabash.framework')
+  if File.directory?('./calabash.xcframework')
+    puts 'INFO: removing old calabash.xcframework'
+    FileUtils.rm_r('./calabash.xcframework')
   end
 
-  tar_file = './calabash.framework.tar'
+  tar_file = './calabash.xcframework.tar'
   if File.exists?(tar_file)
-    puts 'INFO: removing old calabash.framework.tar'
+    puts 'INFO: removing old calabash.xcframework.tar'
     FileUtils.rm(tar_file)
   end
 
   puts "INFO: making a tarball of #{source}"
-  `tar -C #{File.join(source, '..')} -cf calabash.framework.tar calabash.framework`
+  `tar -C #{File.join(source, '..')} -cf calabash.xcframework.tar calabash.xcframework`
 
   puts 'INFO: extracting calabash.framework from tarball'
   `tar -xf #{tar_file}`
@@ -349,11 +358,11 @@ def verify_dylibs(which=:both)
       verify_dylibs :sim
     when :sim
       simulator_dylib = path_to_simulator_dylib
-      lipo_verify_arches(simulator_dylib, ['i386', 'x86_64'])
+      lipo_verify_arches(simulator_dylib, 'iphonesimulator', ['arm64', 'x86_64'])
       lipo_put_info(simulator_dylib)
     when :device
       device_dylib = path_to_device_dylib
-      lipo_verify_arches(device_dylib, ['armv7', 'armv7s', 'arm64'])
+      lipo_verify_arches(device_dylib, 'iphoneos', ['arm64'])
       lipo_put_info(device_dylib)
     else
       raise "Expected `which` arg '#{which}' to be one of [:sim, :device, :both]"
@@ -384,8 +393,7 @@ def stage_dylibs
 end
 
 if ARGV[0] == 'verify-framework'
-  lipo_combine_libs
-  make_framework
+  make_xcframework
   stage_framework
   exit 0
 end
