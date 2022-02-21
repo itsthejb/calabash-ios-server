@@ -31,7 +31,7 @@ else
   else
     target_arg = 'calabash-device'
     sdk = 'iphoneos'
-    arches = 'arm64'
+    arches = 'arm64 armv7'
   end
   args =
         [

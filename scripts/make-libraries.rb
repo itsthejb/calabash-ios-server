@@ -190,7 +190,7 @@ def make_xcframework(opts = {})
   default_opts = {:directory => './build/Debug-combined/calabash.xcframework'}
   merged = default_opts.merge(opts)
   platforms = {
-    "iphoneos" => {:path => path_to_device_lib, :arches => ['arm64']},
+    "iphoneos" => {:path => path_to_device_lib, :arches => ['arm64','armv7']},
     "iphonesimulator" => {:path => path_to_simulator_lib, :arches => ['arm64','x86_64']}
   }
 
@@ -203,11 +203,13 @@ def make_xcframework(opts = {})
 
   platforms.each do |platform, info|
     puts "INFO: making framework for '#{platform}'"
+    arches = info[:arches]
+    path = "ios-" + info[:arches].join("_") + (platform == "iphoneos" ? "" : "-simulator")
     make_framework({
-      :directory => File.join(File.join(directory, platform), 'calabash.framework'),
+      :directory => File.join(File.join(directory, path), 'calabash.framework'),
       :platform => platform,
       :path_to_lib => info[:path],
-      :arches => info[:arches]
+      :arches => arches
     })
     plist_index = nil
     for index in 0..1 do

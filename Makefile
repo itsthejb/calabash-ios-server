@@ -9,7 +9,7 @@ clean:
 	rm -rf libFrankCalabash.a
 	rm -rf calabash-dylibs
 
-framework: #clean
+framework: clean
 	scripts/make-calabash-lib.rb sim
 	scripts/make-calabash-lib.rb device
 	scripts/make-calabash-lib.rb version
