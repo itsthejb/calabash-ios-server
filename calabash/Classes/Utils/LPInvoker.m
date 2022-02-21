@@ -269,7 +269,7 @@ NSString *const LPUnspecifiedInvocationError = @"*invocation error*";
   }
 
   // Guard against invalid access when asking for encoding[0]
-  if (!encoding.length >= 1) {
+  if (!(encoding.length >= 1)) {
     NSLog(@"Selector '%@' on '%@' has an invalid encoding; '%@' must have at least once character.",
           NSStringFromSelector(selector), target, encoding);
     return [LPCoercion coercionWithFailureMessage:LPSelectorHasUnknownEncoding];
